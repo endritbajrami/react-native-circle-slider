@@ -1,6 +1,6 @@
-import React, { FC, useState, useRef, useCallback } from "react";
+import React, { FC, useState, useRef, useCallback, useEffect } from "react";
 import { PanResponder, Dimensions } from "react-native";
-import Svg, { Path, Circle, G, Text } from "react-native-svg";
+import Svg, { Path, Circle, G, Text, Stop, Defs, LinearGradient } from "react-native-svg";
 
 interface Props {
 	btnRadius?: number;
@@ -38,7 +38,17 @@ const CircleSlider: FC<Props> = ({
 	onValueChange = (x) => x,
 }) => {
 	const [angle, setAngle] = useState(value);
-	//ditiditit
+	
+	useEffect(() => {
+		setAngle(value)
+		
+	}, [value])
+
+	useEffect(() => {
+		onValueChange(angle)
+	}, [angle])
+	
+
 	const panResponder = useRef(
 		PanResponder.create({
 			onStartShouldSetPanResponder: (e, gs) => true,
@@ -98,20 +108,35 @@ const CircleSlider: FC<Props> = ({
 	const startCoord = polarToCartesian(0);
 	var endCoord = polarToCartesian(angle);
 
+	// console.log(endCoord.x - bR)
+	// console.log(endCoord.y - bR)
+	// console.log(endCoord)
+
 	return (
-		<Svg width={width} height={width}>
+		<Svg  width={width} height={width}>
+			 <Defs>
+				<LinearGradient id="grad" x1="0" y1="1" x2="1" y2="1">
+				<Stop offset="0" stopColor="#ABDDFB" stopOpacity="1" />
+				<Stop offset="1" stopColor="blue" stopOpacity="1" />
+				</LinearGradient>
+			</Defs>
 			<Circle
 				r={dR}
 				cx={width / 2}
 				cy={width / 2}
-				stroke={strokeColor}
+				stroke="url(#grad)"
 				strokeWidth={strokeWidth}
 				fill={fillColor}
-			/>
+				strokeOpacity={0.5}
+			>
+			<Stop offset="0%" stop-color="red"/>
+            <Stop offset="100%" stop-color="red"  />
+			</Circle>
 
 			<Path
 				stroke={meterColor}
 				strokeWidth={dialWidth}
+				strokeLinecap='round'
 				fill="none"
 				d={`M${startCoord.x} ${startCoord.y} A ${dR} ${dR} 0 ${
 					angle > 180 ? 1 : 0
@@ -123,18 +148,9 @@ const CircleSlider: FC<Props> = ({
 					r={bR}
 					cx={bR}
 					cy={bR}
-					fill={meterColor}
+					fill='#0567B2'
 					{...panResponder.panHandlers}
 				/>
-				<Text
-					x={bR}
-					y={bR + textSize / 2}
-					fontSize={textSize}
-					fill={textColor}
-					textAnchor="middle"
-				>
-					{onValueChange(angle) + ""}
-				</Text>
 			</G>
 		</Svg>
 	);
